@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { parseHistoryFile, ParseResult } from '../../utils/clientParser';
 import { UploadCloud, AlertCircle, X } from 'lucide-react';
 
@@ -19,11 +19,23 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleFile = async (file: File) => {
     if (!file.name.endsWith('.json')) {
-      setError('Please select a valid Chrome history JSON file (e.g. History.json from Google Takeout).');
+      setError('Please select a valid Chrome history JSON file (History.json).');
       return;
     }
 
@@ -37,7 +49,7 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
       onClose();
     } catch (err: any) {
       console.error('File parsing error:', err);
-      setError(err?.message || 'Failed to parse JSON file. Ensure it is a valid Takeout export.');
+      setError(err?.message || 'Failed to parse JSON file.');
     } finally {
       setIsProcessing(false);
     }
@@ -52,25 +64,28 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden p-6 animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-md backdrop-blur-2xl bg-white/95 dark:bg-[#1E1E1E]/95 border border-black/10 dark:border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden p-6 animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">
-            Load Takeout History File
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-base text-[#1D1D1F] dark:text-[#F5F5F7]">
+            Import History
           </h3>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1 rounded-full text-[#86868B] hover:text-[#1D1D1F] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.1]"
           >
-            <X size={18} />
+            <X size={16} strokeWidth={2} />
           </button>
         </div>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-          Select or drop your Google Takeout <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">History.json</code> file to explore it in the calendar.
+        <p className="text-xs text-[#86868B] dark:text-[#A1A1A6] mb-4">
+          Drop your Google Takeout <code className="bg-black/[0.05] dark:bg-white/[0.1] px-1 py-0.5 rounded text-[11px] font-mono">History.json</code> file to inspect it in the calendar.
         </p>
 
         {/* Drop zone */}
@@ -82,10 +97,10 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+          className={`border border-dashed rounded-2xl p-7 text-center cursor-pointer transition-all ${
             isDragging
-              ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30'
-              : 'border-slate-200 dark:border-slate-700 hover:border-brand-400 dark:hover:border-brand-600 bg-slate-50/50 dark:bg-slate-800/30'
+              ? 'border-[#007AFF] bg-[#007AFF]/5'
+              : 'border-black/15 dark:border-white/15 hover:border-[#007AFF] dark:hover:border-[#0A84FF] bg-black/[0.02] dark:bg-white/[0.03]'
           }`}
         >
           <input
@@ -100,38 +115,38 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
             }}
           />
 
-          <div className="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <UploadCloud size={24} />
+          <div className="w-10 h-10 bg-[#007AFF]/10 text-[#007AFF] dark:text-[#0A84FF] rounded-full flex items-center justify-center mx-auto mb-2.5">
+            <UploadCloud size={20} strokeWidth={2} />
           </div>
 
-          <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">
-            Click to upload or drag & drop
+          <div className="text-[13px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7] mb-0.5">
+            Choose a file or drag it here
           </div>
-          <div className="text-xs text-slate-400 font-mono">
-            History.json (Google Takeout format)
+          <div className="text-[11px] text-[#86868B] font-mono">
+            History.json
           </div>
         </div>
 
         {/* Progress bar */}
         {isProcessing && (
-          <div className="mt-4 space-y-1.5">
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>Parsing and indexing JSON...</span>
+          <div className="mt-4 space-y-1">
+            <div className="flex justify-between text-[11px] text-[#86868B]">
+              <span>Indexing Takeout history...</span>
               <span>{progress}%</span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-black/[0.05] dark:bg-white/[0.1] rounded-full h-1.5 overflow-hidden">
               <div
                 style={{ width: `${progress}%` }}
-                className="bg-brand-600 h-full rounded-full transition-all duration-300"
+                className="bg-[#007AFF] h-full rounded-full transition-all duration-300"
               />
             </div>
           </div>
         )}
 
-        {/* Error notice */}
+        {/* Error message */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl flex items-start gap-2 text-xs text-red-700 dark:text-red-300">
-            <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+          <div className="mt-4 p-3 bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-xl flex items-start gap-2 text-xs text-[#FF3B30]">
+            <AlertCircle size={15} className="flex-shrink-0 mt-0.5" strokeWidth={2} />
             <span>{error}</span>
           </div>
         )}
@@ -139,4 +154,3 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
     </div>
   );
 };
-

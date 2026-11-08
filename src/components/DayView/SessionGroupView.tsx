@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { HistoryEntry } from '../../types';
 import { formatDuration } from '../../utils/dateUtils';
-import { getDomainColor, getFaviconUrl } from '../../utils/domainColors';
-import { Clock, Coffee, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { getFaviconUrl } from '../../utils/domainColors';
+import { Clock, Coffee, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface SessionGroupViewProps {
   entries: HistoryEntry[];
@@ -20,7 +20,6 @@ interface Session {
 }
 
 export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onFilterDomain }) => {
-  // Group entries by session (gap > 25 mins)
   const sorted = [...entries].sort((a, b) => a.time_ms - b.time_ms);
 
   const sessions: Session[] = [];
@@ -34,12 +33,10 @@ export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onF
       const gapMins = Math.round(gapMs / (60 * 1000));
 
       if (gapMins > 25) {
-        // Close current session
         const startEntry = currentSessionEntries[0];
         const endEntry = currentSessionEntries[currentSessionEntries.length - 1];
         const durationMins = Math.max(1, Math.round((endEntry.time_ms - startEntry.time_ms) / 60000));
 
-        // Top domains in session
         const domCounts = new Map<string, number>();
         currentSessionEntries.forEach((e) => domCounts.set(e.domain, (domCounts.get(e.domain) || 0) + 1));
         const topDomains = Array.from(domCounts.entries())
@@ -85,7 +82,6 @@ export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onF
     }
   }
 
-  // Track expanded sessions (default all open)
   const [expandedSessions, setExpandedSessions] = useState<Record<number, boolean>>(() => {
     const init: Record<number, boolean> = {};
     sessions.forEach((s) => (init[s.id] = true));
@@ -97,24 +93,23 @@ export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onF
   };
 
   return (
-    <div className="space-y-4">
-      <div className="text-xs text-slate-500 pb-1">
-        Found {sessions.length} browsing session{sessions.length > 1 ? 's' : ''} with breaks longer than 25 minutes.
+    <div className="space-y-3">
+      <div className="text-xs text-[#86868B] dark:text-[#A1A1A6] px-1 pb-1">
+        {sessions.length} browsing session{sessions.length > 1 ? 's' : ''} with breaks &gt; 25 mins
       </div>
 
       {sessions.map((session, index) => {
         const isExpanded = expandedSessions[session.id] ?? true;
 
-        // Gap from previous session
         let gapNotice = null;
         if (index > 0) {
           const prevEndMs = sessions[index - 1].entries[sessions[index - 1].entries.length - 1].time_ms;
           const curStartMs = session.entries[0].time_ms;
           const gapMinutes = Math.round((curStartMs - prevEndMs) / 60000);
           gapNotice = (
-            <div className="flex items-center justify-center my-3">
-              <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full text-xs font-medium border border-slate-200 dark:border-slate-700/80">
-                <Coffee size={13} className="text-amber-500" />
+            <div className="flex items-center justify-center my-2">
+              <div className="flex items-center gap-1.5 px-3 py-0.5 bg-black/[0.04] dark:bg-white/[0.08] text-[#86868B] dark:text-[#A1A1A6] rounded-full text-[11px] font-normal">
+                <Coffee size={12} strokeWidth={2} />
                 <span>{formatDuration(gapMinutes)} break</span>
               </div>
             </div>
@@ -124,93 +119,76 @@ export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onF
         return (
           <React.Fragment key={session.id}>
             {gapNotice}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs">
+            <div className="bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
               <div
                 onClick={() => toggleSession(session.id)}
-                className="p-4 cursor-pointer bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/80 transition-colors flex flex-wrap items-center justify-between gap-3"
+                className="p-3.5 cursor-pointer hover:bg-black/[0.025] dark:hover:bg-white/[0.035] transition-colors flex flex-wrap items-center justify-between gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <button className="text-slate-400 p-0.5">
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  </button>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[#86868B] p-0.5">
+                    {isExpanded ? <ChevronDown size={14} strokeWidth={2} /> : <ChevronRight size={14} strokeWidth={2} />}
+                  </span>
 
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-brand-500" />
-                    <span className="font-semibold text-sm text-slate-800 dark:text-slate-100">
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={14} className="text-[#007AFF] dark:text-[#0A84FF]" strokeWidth={2} />
+                    <span className="font-medium text-[13px] text-[#1D1D1F] dark:text-[#F5F5F7]">
                       Session {index + 1}: {session.startTime} – {session.endTime}
                     </span>
                   </div>
 
-                  <span className="text-xs bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 px-2 py-0.5 rounded-full border border-brand-200 dark:border-brand-800 font-medium">
+                  <span className="text-[11px] bg-[#007AFF]/10 text-[#007AFF] dark:text-[#0A84FF] px-2 py-0.5 rounded-full font-medium">
                     {formatDuration(session.durationMinutes)}
                   </span>
 
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    ({session.entries.length} page{session.entries.length > 1 ? 's' : ''})
+                  <span className="text-[11px] text-[#86868B] dark:text-[#A1A1A6]">
+                    ({session.entries.length} pages)
                   </span>
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {session.topDomains.map(({ domain, count }) => {
-                    const c = getDomainColor(domain);
-                    return (
-                      <button
-                        key={domain}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onFilterDomain(domain);
-                        }}
-                        className={`text-[11px] px-2 py-0.5 rounded-md border font-medium transition-colors ${c.bg} ${c.text} ${c.border}`}
-                      >
-                        {domain} ({count})
-                      </button>
-                    );
-                  })}
+                  {session.topDomains.map(({ domain, count }) => (
+                    <button
+                      key={domain}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFilterDomain(domain);
+                      }}
+                      className="text-[11px] px-2 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[#86868B] dark:text-[#A1A1A6] hover:text-[#007AFF] transition-colors"
+                    >
+                      {domain} ({count})
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {isExpanded && (
-                <div className="p-3 border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/60 max-h-96 overflow-y-auto">
+                <div className="p-2 border-t border-black/[0.05] dark:border-white/[0.06] divide-y divide-black/[0.03] dark:divide-white/[0.04] max-h-80 overflow-y-auto">
                   {session.entries.map((entry) => (
                     <div
                       key={entry.id}
-                      className="py-2 px-2 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-lg group"
+                      className="py-1.5 px-2 flex items-center justify-between gap-3 text-xs"
                     >
-                      <div className="flex items-start gap-2.5 min-w-0">
-                        <span className="font-mono text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-[11px] text-[#86868B] dark:text-[#8E8E93] flex-shrink-0">
                           {entry.time_formatted}
                         </span>
                         <img
                           src={getFaviconUrl(entry.domain, entry.favicon_url)}
                           alt=""
-                          className="w-4 h-4 mt-0.5 rounded-xs object-contain flex-shrink-0"
+                          className="w-3.5 h-3.5 rounded-[2px] object-contain flex-shrink-0"
                           onError={(e) => {
                             (e.target as HTMLElement).style.display = 'none';
                           }}
                         />
-                        <div className="min-w-0">
-                          <a
-                            href={entry.url}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-xs font-medium text-slate-800 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 hover:underline line-clamp-1"
-                          >
-                            {entry.title}
-                          </a>
-                          <div className="text-[11px] text-slate-400 truncate font-mono">
-                            {entry.url}
-                          </div>
-                        </div>
+                        <a
+                          href={entry.url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="text-[12px] text-[#1D1D1F] dark:text-[#E5E5EA] hover:text-[#007AFF] dark:hover:text-[#0A84FF] hover:underline truncate"
+                        >
+                          {entry.title}
+                        </a>
                       </div>
-
-                      <a
-                        href={entry.url}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="p-1 text-slate-400 hover:text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                      >
-                        <ExternalLink size={13} />
-                      </a>
                     </div>
                   ))}
                 </div>
@@ -222,4 +200,3 @@ export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onF
     </div>
   );
 };
-

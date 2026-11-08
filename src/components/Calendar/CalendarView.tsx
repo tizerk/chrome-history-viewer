@@ -6,11 +6,7 @@ import {
   getCalendarMonthDays,
   parseDateYMD,
 } from '../../utils/dateUtils';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar as CalendarIcon,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarViewProps {
   calendarOverview: CalendarOverview | null;
@@ -23,7 +19,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   selectedDate,
   onSelectDate,
 }) => {
-  // Initialize view year & month from selectedDate or latest date
   const initialDate = useMemo(() => {
     if (selectedDate) return parseDateYMD(selectedDate);
     if (calendarOverview?.maxDate) return parseDateYMD(calendarOverview.maxDate);
@@ -31,10 +26,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   }, [selectedDate, calendarOverview?.maxDate]);
 
   const [viewYear, setViewYear] = useState<number>(initialDate.getFullYear());
-  const [viewMonth, setViewMonth] = useState<number>(initialDate.getMonth()); // 0-11
+  const [viewMonth, setViewMonth] = useState<number>(initialDate.getMonth());
   const [hoveredDay, setHoveredDay] = useState<{ day: CalendarDay; count: number; topDomains?: any[] } | null>(null);
 
-  // Sync view when selectedDate changes if not in current view
   React.useEffect(() => {
     if (selectedDate) {
       const d = parseDateYMD(selectedDate);
@@ -63,12 +57,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
   };
 
-  // Calendar days grid
   const monthDays = useMemo(() => {
     return getCalendarMonthDays(viewYear, viewMonth);
   }, [viewYear, viewMonth]);
 
-  // Statistics for the currently viewed month
   const monthStats = useMemo(() => {
     if (!calendarOverview?.days) return { visits: 0, activeDays: 0, topDomain: null };
 
@@ -99,25 +91,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return { visits, activeDays, topDomain };
   }, [calendarOverview?.days, viewYear, viewMonth]);
 
-  // Heat map intensity calculator
-  const getHeatClass = (count: number, isSelected: boolean) => {
+  // Clean uniform styling without heat gradient colors
+  const getDayStyle = (isSelected: boolean) => {
     if (isSelected) {
-      return 'bg-brand-600 text-white font-bold ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-slate-900';
+      return 'bg-[#007AFF] text-white font-semibold shadow-xs';
     }
-    if (count === 0) {
-      return 'text-slate-400 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800/60';
-    }
-    if (count <= 50) {
-      return 'bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-200 border border-sky-200 dark:border-sky-800/60 hover:bg-sky-100';
-    }
-    if (count <= 200) {
-      return 'bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-700 hover:bg-blue-200';
-    }
-    if (count <= 500) {
-      return 'bg-brand-500 text-white font-medium hover:bg-brand-600 shadow-xs';
-    }
-    // > 500 visits
-    return 'bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow-xs ring-1 ring-indigo-400';
+    return 'text-[#1D1D1F] dark:text-[#F5F5F7] hover:bg-black/[0.05] dark:hover:bg-white/[0.08]';
   };
 
   const availableYears = useMemo(() => {
@@ -134,34 +113,22 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   }, [calendarOverview?.minDate, calendarOverview?.maxDate, viewYear]);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs select-none">
+    <div className="bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] select-none">
       {/* Month & Navigation Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-1.5">
-          <CalendarIcon size={18} className="text-brand-500" />
-          <h3 className="font-bold text-base text-slate-800 dark:text-slate-100 tracking-tight">
-            {formatMonthYear(viewYear, viewMonth)}
-          </h3>
-        </div>
+      <div className="flex items-center justify-between mb-3 px-1">
+        <h3 className="font-semibold text-[15px] text-[#1D1D1F] dark:text-[#F5F5F7] tracking-tight">
+          {formatMonthYear(viewYear, viewMonth)}
+        </h3>
 
         <div className="flex items-center gap-1">
-          <button
-            onClick={handlePrevMonth}
-            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Previous month"
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          {/* Quick Year Selector */}
           {availableYears.length > 1 && (
             <select
               value={viewYear}
               onChange={(e) => setViewYear(Number(e.target.value))}
-              className="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 font-medium text-slate-700 dark:text-slate-300 focus:outline-hidden"
+              className="text-xs bg-black/[0.04] dark:bg-white/[0.08] rounded-md px-2 py-1 font-medium text-[#1D1D1F] dark:text-[#F5F5F7] border-0 focus:outline-hidden cursor-pointer"
             >
               {availableYears.map((yr) => (
-                <option key={yr} value={yr}>
+                <option key={yr} value={yr} className="bg-white dark:bg-[#1C1C1E]">
                   {yr}
                 </option>
               ))}
@@ -169,37 +136,46 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           )}
 
           <button
+            onClick={handlePrevMonth}
+            className="p-1 rounded-full text-[#86868B] hover:text-[#1D1D1F] dark:text-[#A1A1A6] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.1] transition-colors"
+            title="Previous month"
+          >
+            <ChevronLeft size={16} strokeWidth={2} />
+          </button>
+
+          <button
             onClick={handleNextMonth}
-            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-full text-[#86868B] hover:text-[#1D1D1F] dark:text-[#A1A1A6] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.1] transition-colors"
             title="Next month"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={16} strokeWidth={2} />
           </button>
         </div>
       </div>
 
-      {/* Weekday Labels */}
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400 dark:text-slate-500 mb-2">
-        <span>Su</span>
-        <span>Mo</span>
-        <span>Tu</span>
-        <span>We</span>
-        <span>Th</span>
-        <span>Fr</span>
-        <span>Sa</span>
+      {/* Weekday Labels (Apple Calendar style) */}
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-[#8E8E93] dark:text-[#636366] mb-1.5">
+        <span>S</span>
+        <span>M</span>
+        <span>T</span>
+        <span>W</span>
+        <span>T</span>
+        <span>F</span>
+        <span>S</span>
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1">
         {monthDays.map((calDay) => {
           const daySummary = calendarOverview?.days?.[calDay.dateStr];
           const visitCount = daySummary?.count || 0;
           const isSelected = selectedDate === calDay.dateStr;
+          const hasActivity = visitCount > 0;
 
           return (
             <div
               key={calDay.dateStr}
-              className="relative aspect-square"
+              className="aspect-square flex items-center justify-center relative"
               onMouseEnter={() =>
                 setHoveredDay({
                   day: calDay,
@@ -212,20 +188,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectDate(calDay.dateStr)}
-                className={`w-full h-full rounded-xl flex flex-col items-center justify-center text-xs transition-all duration-150 relative ${
-                  !calDay.isCurrentMonth ? 'opacity-30' : 'opacity-100'
-                } ${getHeatClass(visitCount, isSelected)}`}
+                className={`w-8 h-8 rounded-full flex flex-col items-center justify-center text-[13px] transition-all relative ${
+                  !calDay.isCurrentMonth ? 'opacity-25' : 'opacity-100'
+                } ${getDayStyle(isSelected)}`}
               >
-                <span className="font-medium text-[13px]">{calDay.dayNumber}</span>
-                {visitCount > 0 && !isSelected && (
-                  <span className="text-[9px] font-mono opacity-85 leading-none mt-0.5">
-                    {visitCount > 999 ? `${Math.round(visitCount / 1000)}k` : visitCount}
-                  </span>
-                )}
-                {isSelected && (
-                  <span className="text-[9px] font-mono leading-none mt-0.5">
-                    {visitCount}
-                  </span>
+                <span className={`leading-none ${hasActivity ? '-mt-0.5' : ''}`}>
+                  {calDay.dayNumber}
+                </span>
+                {hasActivity && (
+                  <span
+                    className={`w-1 h-1 rounded-full mt-0.5 ${
+                      isSelected ? 'bg-white' : 'bg-[#007AFF] dark:bg-[#0A84FF]'
+                    }`}
+                  />
                 )}
               </button>
             </div>
@@ -233,53 +208,30 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         })}
       </div>
 
-      {/* Hover Tooltip display */}
-      <div className="min-h-[38px] mt-3 py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs flex items-center justify-between">
+      {/* Hover Info bar */}
+      <div className="min-h-[32px] mt-2 px-2.5 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] text-[12px] flex items-center justify-between text-[#86868B] dark:text-[#A1A1A6]">
         {hoveredDay ? (
           <div>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">
+            <span className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
               {hoveredDay.day.dateStr}
             </span>
-            : <span className="font-bold text-brand-600 dark:text-brand-400">{hoveredDay.count}</span> visits
+            : <span className="font-medium text-[#007AFF] dark:text-[#0A84FF]">{hoveredDay.count}</span> visits
             {hoveredDay.topDomains && hoveredDay.topDomains.length > 0 && (
-              <span className="text-slate-400 ml-1">
-                (top: {hoveredDay.topDomains[0].domain})
+              <span className="ml-1 opacity-80">
+                • {hoveredDay.topDomains[0].domain}
               </span>
             )}
           </div>
         ) : (
-          <span className="text-slate-400 dark:text-slate-500">
-            Click any date on the calendar to view its history
+          <span className="text-[11px] opacity-75">
+            Select a date to inspect history
           </span>
         )}
       </div>
 
       {/* Month Summary Bar */}
-      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs flex items-center justify-between text-slate-500 dark:text-slate-400">
-        <div>
-          <span>This month: </span>
-          <strong className="text-slate-800 dark:text-slate-200 font-semibold">
-            {monthStats.visits.toLocaleString()}
-          </strong>{' '}
-          visits across{' '}
-          <strong className="text-slate-800 dark:text-slate-200 font-semibold">
-            {monthStats.activeDays}
-          </strong>{' '}
-          days
-        </div>
-      </div>
-
-      {/* Heatmap Legend */}
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-        <span>Less active</span>
-        <div className="flex items-center gap-1">
-          <span className="w-3.5 h-3.5 rounded-xs bg-slate-100 dark:bg-slate-800" title="0 visits" />
-          <span className="w-3.5 h-3.5 rounded-xs bg-sky-100 dark:bg-sky-950/60" title="1-50 visits" />
-          <span className="w-3.5 h-3.5 rounded-xs bg-blue-200 dark:bg-blue-900/60" title="51-200 visits" />
-          <span className="w-3.5 h-3.5 rounded-xs bg-brand-500" title="201-500 visits" />
-          <span className="w-3.5 h-3.5 rounded-xs bg-indigo-600" title="500+ visits" />
-        </div>
-        <span>More active</span>
+      <div className="mt-2 pt-2.5 border-t border-black/[0.05] dark:border-white/[0.06] text-[11px] text-[#86868B] dark:text-[#A1A1A6]">
+        <span>{monthStats.visits.toLocaleString()} visits across {monthStats.activeDays} days</span>
       </div>
     </div>
   );

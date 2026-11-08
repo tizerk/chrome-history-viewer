@@ -2,14 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
+  }
 }
 
-/* Custom scrollbars */
+/* Apple-style minimalist scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
@@ -17,11 +21,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.4);
+  background: rgba(142, 142, 147, 0.3);
   border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.6);
+  background: rgba(142, 142, 147, 0.5);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
+/* Smooth transitions for interactive elements */
+button, a, input, select {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}

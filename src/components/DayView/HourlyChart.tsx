@@ -23,25 +23,26 @@ export const HourlyChart: React.FC<HourlyChartProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+      <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Hourly Distribution
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#86868B] dark:text-[#8E8E93]">
+            Hourly Activity
           </span>
           {activeHourFilter !== null && (
             <button
               onClick={() => onSelectHour(null)}
-              className="text-xs text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 font-medium"
+              className="text-[11px] text-[#007AFF] dark:text-[#0A84FF] hover:underline font-medium"
             >
               (Filtered to {formatHourLabel(activeHourFilter)} • Clear)
             </button>
           )}
         </div>
-        <div className="text-xs text-slate-500 dark:text-slate-400">
+
+        <div className="text-[12px] text-[#86868B] dark:text-[#A1A1A6]">
           {hoveredHour !== null ? (
             <span>
-              <strong className="text-slate-900 dark:text-slate-100 font-semibold">
+              <strong className="text-[#1D1D1F] dark:text-[#F5F5F7] font-medium">
                 {formatHourLabel(hoveredHour)}
               </strong>
               : {hourly[hoveredHour]} visits (
@@ -51,12 +52,13 @@ export const HourlyChart: React.FC<HourlyChartProps> = ({
               %)
             </span>
           ) : (
-            <span>Click any bar to filter by hour</span>
+            <span className="text-[11px]">Click a bar to filter</span>
           )}
         </div>
       </div>
 
-      <div className="flex items-end gap-1 sm:gap-1.5 h-20 pt-2 px-1">
+      {/* Screen Time style vertical capsule bars */}
+      <div className="flex items-end gap-1.5 sm:gap-2 h-16 pt-1 px-1">
         {hourly.map((count, hour) => {
           const heightPercent = maxVisits > 0 ? Math.max((count / maxVisits) * 100, 4) : 4;
           const isSelected = activeHourFilter === hour;
@@ -70,18 +72,18 @@ export const HourlyChart: React.FC<HourlyChartProps> = ({
               onMouseEnter={() => setHoveredHour(hour)}
               onMouseLeave={() => setHoveredHour(null)}
               className={`flex-1 h-full flex flex-col justify-end items-center group relative focus:outline-hidden transition-all ${
-                isFilteredOut ? 'opacity-35' : 'opacity-100'
+                isFilteredOut ? 'opacity-25' : 'opacity-100'
               }`}
               title={`${formatHourLabel(hour)}: ${count} visits`}
             >
               <div
                 style={{ height: `${count > 0 ? heightPercent : 4}%` }}
-                className={`w-full rounded-t-sm transition-all duration-200 ${
+                className={`w-full max-w-[8px] rounded-full transition-all duration-200 ${
                   isSelected
-                    ? 'bg-brand-600 dark:bg-brand-400 shadow-md ring-2 ring-brand-500 ring-offset-1'
+                    ? 'bg-[#007AFF] shadow-xs ring-2 ring-[#007AFF]/30'
                     : count > 0
-                    ? 'bg-brand-400/80 hover:bg-brand-500 dark:bg-brand-500/80 dark:hover:bg-brand-400'
-                    : 'bg-slate-200 dark:bg-slate-800'
+                    ? 'bg-[#007AFF]/75 hover:bg-[#007AFF] dark:bg-[#0A84FF]/75 dark:hover:bg-[#0A84FF]'
+                    : 'bg-black/[0.06] dark:bg-white/[0.08]'
                 }`}
               />
             </button>
@@ -89,7 +91,7 @@ export const HourlyChart: React.FC<HourlyChartProps> = ({
         })}
       </div>
 
-      <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-2 px-1 font-mono">
+      <div className="flex justify-between text-[10px] text-[#86868B] dark:text-[#8E8E93] mt-2 px-1 font-mono">
         <span>12 AM</span>
         <span>6 AM</span>
         <span>12 PM</span>
@@ -99,4 +101,3 @@ export const HourlyChart: React.FC<HourlyChartProps> = ({
     </div>
   );
 };
-
