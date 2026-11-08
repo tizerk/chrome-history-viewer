@@ -26,6 +26,7 @@ export const App: React.FC = () => {
   // Upload state for the welcome screen
   const [isParsingLanding, setIsParsingLanding] = useState(false);
   const [landingProgress, setLandingProgress] = useState(0);
+  const [landingMessage, setLandingMessage] = useState('Indexing Takeout history...');
   const [landingError, setLandingError] = useState<string | null>(null);
   const [isDraggingLanding, setIsDraggingLanding] = useState(false);
   const landingFileInputRef = useRef<HTMLInputElement>(null);
@@ -108,9 +109,13 @@ export const App: React.FC = () => {
     setLandingError(null);
     setIsParsingLanding(true);
     setLandingProgress(10);
+    setLandingMessage('Reading Takeout file in background...');
 
     try {
-      const result = await parseHistoryFile(file, (p) => setLandingProgress(p));
+      const result = await parseHistoryFile(file, (p, msg) => {
+        setLandingProgress(p);
+        if (msg) setLandingMessage(msg);
+      });
       handleFileParsed(result, file.name);
     } catch (err: any) {
       console.error('File parsing error:', err);
@@ -214,10 +219,10 @@ export const App: React.FC = () => {
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-bold text-[#1D1D1F] dark:text-[#F5F5F7] tracking-tight mb-2">
-              Welcome to Chrome History
+              Chrome History Viewer
             </h2>
             <p className="text-sm text-[#86868B] dark:text-[#A1A1A6] max-w-md mx-auto mb-8 leading-relaxed">
-              Upload your Google Takeout <code className="bg-black/[0.05] dark:bg-white/[0.1] px-1.5 py-0.5 rounded font-mono text-[12px] text-[#1D1D1F] dark:text-white">History.json</code> file to explore your browsing activity by calendar date, website, and session.
+              Upload your Google Takeout <code className="bg-black/[0.05] dark:bg-white/[0.1] px-1.5 py-0.5 rounded font-mono text-[12px] text-[#1D1D1F] dark:text-white">History.json</code> file to view your browsing history.
             </p>
 
             {/* Apple Drag & Drop Zone */}
@@ -260,7 +265,7 @@ export const App: React.FC = () => {
                 Drag and drop your History.json file here
               </div>
               <p className="text-xs text-[#86868B] dark:text-[#A1A1A6] mb-5">
-                Processed privately inside your browser
+                Processed entirely on your own computer
               </p>
 
               <button
@@ -274,10 +279,10 @@ export const App: React.FC = () => {
 
               {/* Progress bar */}
               {isParsingLanding && (
-                <div className="mt-6 max-w-xs mx-auto space-y-1.5">
+                <div className="mt-6 max-w-sm mx-auto space-y-1.5">
                   <div className="flex justify-between text-[11px] text-[#86868B]">
-                    <span>Indexing history...</span>
-                    <span>{landingProgress}%</span>
+                    <span className="truncate pr-2">{landingMessage}</span>
+                    <span className="font-mono">{landingProgress}%</span>
                   </div>
                   <div className="w-full bg-black/[0.05] dark:bg-white/[0.1] rounded-full h-1.5 overflow-hidden">
                     <div

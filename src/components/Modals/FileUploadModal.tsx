@@ -16,6 +16,7 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState('Indexing Takeout history...');
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,9 +43,13 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
     setError(null);
     setIsProcessing(true);
     setProgress(10);
+    setProgressMessage('Reading Takeout file in background...');
 
     try {
-      const result = await parseHistoryFile(file, (p) => setProgress(p));
+      const result = await parseHistoryFile(file, (p, msg) => {
+        setProgress(p);
+        if (msg) setProgressMessage(msg);
+      });
       onFileParsed(result, file.name);
       onClose();
     } catch (err: any) {
@@ -131,8 +136,8 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
         {isProcessing && (
           <div className="mt-4 space-y-1">
             <div className="flex justify-between text-[11px] text-[#86868B]">
-              <span>Indexing Takeout history...</span>
-              <span>{progress}%</span>
+              <span className="truncate pr-2">{progressMessage}</span>
+              <span className="font-mono">{progress}%</span>
             </div>
             <div className="w-full bg-black/[0.05] dark:bg-white/[0.1] rounded-full h-1.5 overflow-hidden">
               <div
