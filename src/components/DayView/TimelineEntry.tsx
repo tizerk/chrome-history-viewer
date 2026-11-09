@@ -28,6 +28,8 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({ group, onFilterDom
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const faviconUrl = getFaviconUrl(leadEntry.domain, leadEntry.favicon_url);
+
   return (
     <div className="group/row transition-colors px-3 py-2 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.04]">
       <div className="flex items-start justify-between gap-3">
@@ -40,9 +42,9 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({ group, onFilterDom
 
           {/* Favicon */}
           <div className="mt-0.5 flex-shrink-0 w-4 h-4 flex items-center justify-center">
-            {!faviconFailed ? (
+            {faviconUrl && !faviconFailed ? (
               <img
-                src={getFaviconUrl(leadEntry.domain, leadEntry.favicon_url)}
+                src={faviconUrl}
                 alt=""
                 className="w-4 h-4 object-contain rounded-[3px]"
                 onError={() => setFaviconFailed(true)}

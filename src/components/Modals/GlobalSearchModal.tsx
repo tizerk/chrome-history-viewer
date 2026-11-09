@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HistoryEntry } from '../../types';
 import { formatDateReadable } from '../../utils/dateUtils';
 import { getFaviconUrl } from '../../utils/domainColors';
-import { Search, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, Globe } from 'lucide-react';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -115,20 +115,25 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             </div>
           ) : results.length > 0 ? (
             results.map((entry) => {
+              const faviconUrl = getFaviconUrl(entry.domain, entry.favicon_url);
               return (
                 <div
                   key={entry.id}
                   className="px-3 py-2 rounded-xl hover:bg-black/[0.035] dark:hover:bg-white/[0.05] group flex items-center justify-between gap-3 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <img
-                      src={getFaviconUrl(entry.domain, entry.favicon_url)}
-                      alt=""
-                      className="w-4 h-4 rounded-[3px] object-contain flex-shrink-0 mt-0.5"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
+                    {faviconUrl ? (
+                      <img
+                        src={faviconUrl}
+                        alt=""
+                        className="w-4 h-4 rounded-[3px] object-contain flex-shrink-0 mt-0.5"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <Globe size={14} className="text-[#86868B] flex-shrink-0 mt-0.5" />
+                    )}
 
                     <div className="min-w-0 flex-1">
                       {/* Clickable page link opening in new tab */}

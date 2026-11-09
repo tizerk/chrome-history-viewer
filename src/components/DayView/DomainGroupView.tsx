@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HistoryEntry } from '../../types';
 import { getFaviconUrl } from '../../utils/domainColors';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Globe } from 'lucide-react';
 
 interface DomainGroupViewProps {
   entries: HistoryEntry[];
@@ -64,6 +64,7 @@ export const DomainGroupView: React.FC<DomainGroupViewProps> = ({ entries, onFil
       <div className="bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)] divide-y divide-black/[0.05] dark:divide-white/[0.06]">
         {sortedDomains.map(([domain, domainEntries]) => {
           const isExpanded = expandedDomains[domain] ?? false;
+          const faviconUrl = getFaviconUrl(domain, domainEntries[0]?.favicon_url);
 
           return (
             <div key={domain}>
@@ -76,14 +77,18 @@ export const DomainGroupView: React.FC<DomainGroupViewProps> = ({ entries, onFil
                     {isExpanded ? <ChevronDown size={14} strokeWidth={2} /> : <ChevronRight size={14} strokeWidth={2} />}
                   </span>
 
-                  <img
-                    src={getFaviconUrl(domain, domainEntries[0]?.favicon_url)}
-                    alt=""
-                    className="w-4 h-4 rounded-[3px] object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
-                    }}
-                  />
+                  {faviconUrl ? (
+                    <img
+                      src={faviconUrl}
+                      alt=""
+                      className="w-4 h-4 rounded-[3px] object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <Globe size={14} className="text-[#86868B] flex-shrink-0" />
+                  )}
 
                   <span className="font-medium text-[#1D1D1F] dark:text-[#F5F5F7] text-[13px] truncate">
                     {domain}

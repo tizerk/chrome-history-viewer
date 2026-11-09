@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HistoryEntry } from '../../types';
 import { formatDuration } from '../../utils/dateUtils';
 import { getFaviconUrl } from '../../utils/domainColors';
-import { Clock, Coffee, ChevronDown, ChevronRight } from 'lucide-react';
+import { Clock, Coffee, ChevronDown, ChevronRight, Globe } from 'lucide-react';
 
 interface SessionGroupViewProps {
   entries: HistoryEntry[];
@@ -163,34 +163,41 @@ export const SessionGroupView: React.FC<SessionGroupViewProps> = ({ entries, onF
 
               {isExpanded && (
                 <div className="p-2 border-t border-black/[0.05] dark:border-white/[0.06] divide-y divide-black/[0.03] dark:divide-white/[0.04] max-h-80 overflow-y-auto">
-                  {session.entries.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="py-1.5 px-2 flex items-center justify-between gap-3 text-xs"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-mono text-[11px] text-[#86868B] dark:text-[#8E8E93] flex-shrink-0">
-                          {entry.time_formatted}
-                        </span>
-                        <img
-                          src={getFaviconUrl(entry.domain, entry.favicon_url)}
-                          alt=""
-                          className="w-3.5 h-3.5 rounded-[2px] object-contain flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
-                          }}
-                        />
-                        <a
-                          href={entry.url}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          className="text-[12px] text-[#1D1D1F] dark:text-[#E5E5EA] hover:text-[#007AFF] dark:hover:text-[#0A84FF] hover:underline truncate"
-                        >
-                          {entry.title}
-                        </a>
+                  {session.entries.map((entry) => {
+                    const faviconUrl = getFaviconUrl(entry.domain, entry.favicon_url);
+                    return (
+                      <div
+                        key={entry.id}
+                        className="py-1.5 px-2 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-mono text-[11px] text-[#86868B] dark:text-[#8E8E93] flex-shrink-0">
+                            {entry.time_formatted}
+                          </span>
+                          {faviconUrl ? (
+                            <img
+                              src={faviconUrl}
+                              alt=""
+                              className="w-3.5 h-3.5 rounded-[2px] object-contain flex-shrink-0"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <Globe size={13} className="text-[#86868B] flex-shrink-0" />
+                          )}
+                          <a
+                            href={entry.url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="text-[12px] text-[#1D1D1F] dark:text-[#E5E5EA] hover:text-[#007AFF] dark:hover:text-[#0A84FF] hover:underline truncate"
+                          >
+                            {entry.title}
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
